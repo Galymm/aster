@@ -17,35 +17,34 @@
 <!-- 🗂 Категории и подкатегории -->
 <div class="mb-4">
   <h5 class="fw-bold">Категории</h5>
-  {% for category in categories %}
-    <div class="mb-3">
-      <!-- Основная категория -->
-      <a href="?category={{ category.name }}"
-         class="btn btn-outline-primary btn-sm {% if selected_category == category.name %}active{% endif %}">
-        {{ category.name }}
-      </a>
+{% for category in categories %}
+  <div class="mb-3">
+    <a href="?category={{ category.name }}"
+       class="btn btn-outline-primary btn-sm {% if selected_category == category.name %}active{% endif %}">
+      {{ category.name }}
+    </a>
 
-      <!-- 🔹 Кнопка "Добавить подкатегорию" -->
-      <a href="{% url 'add_subcategory' category.id %}"
-         class="btn btn-outline-success btn-sm ms-2">
-        ➕ Подкатегория
-      </a>
+    <!-- Кнопки действий -->
+    <a href="{% url 'edit_category' category.id %}" class="btn btn-outline-success btn-sm ms-2">✏️</a>
+    <a href="{% url 'delete_category' category.id %}" class="btn btn-outline-danger btn-sm ms-1">❌</a>
+    <a href="{% url 'add_subcategory' category.id %}" class="btn btn-outline-secondary btn-sm ms-1">➕ Подкатегория</a>
 
-      <!-- Подкатегории -->
-      {% if category.subcategories.all %}
-        <div class="ms-4 mt-2">
-          {% for sub in category.subcategories.all %}
-            <a href="?subcategory={{ sub.name }}"
-               class="btn btn-outline-secondary btn-sm {% if selected_subcategory == sub.name %}active{% endif %}">
-              ↳ {{ sub.name }}
-            </a>
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-  {% empty %}
-    <p class="text-muted">Категорий пока нет 😕</p>
-  {% endfor %}
+    {% if category.subcategories.all %}
+      <div class="ms-4 mt-2">
+        {% for sub in category.subcategories.all %}
+          <a href="?subcategory={{ sub.name }}"
+             class="btn btn-outline-secondary btn-sm {% if selected_subcategory == sub.name %}active{% endif %}">
+            ↳ {{ sub.name }}
+          </a>
+          <a href="{% url 'edit_category' sub.id %}" class="btn btn-outline-success btn-sm ms-1">✏️</a>
+          <a href="{% url 'delete_category' sub.id %}" class="btn btn-outline-danger btn-sm ms-1">❌</a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% empty %}
+  <p class="text-muted">Категорий пока нет 😕</p>
+{% endfor %}
 </div>
 <hr>
 

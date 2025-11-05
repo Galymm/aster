@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Q
 from .models import Card, Category
 from .forms import CardForm, CategoryForm
 
@@ -11,22 +12,29 @@ def home(request):
     cards = Card.objects.all()
 
     if query:
-        cards = cards.filter(question__icontains=query)
+        cards = cards.filter(
+            Q(question__icontains=query) |
+            Q(answer__icontains=query) |
+            Q(category__name__icontains=query)
+        )
 
     if category_name:
-        cards = cards.filter(category__name=category_name) | cards.filter(category__parent__name=category_name)
+        cards = cards.filter(
+            Q(category__name=category_name) | Q(category__parent__name=category_name)
+        )
 
     if subcategory_name:
         cards = cards.filter(category__name=subcategory_name)
 
     return render(request, 'cards/home.html', {
-        'cards': cards,
+        'cards': cards.distinct(),
         'categories': categories,
         'selected_category': category_name,
         'selected_subcategory': subcategory_name,
     })
 
 
+# ---- КАРТОЧКИ ----
 def add_card(request):
     if Category.objects.count() == 0:
         return render(request, 'cards/no_category.html')
@@ -60,6 +68,7 @@ def delete_card(request, card_id):
     return redirect('home')
 
 
+# ---- КАТЕГОРИИ ----
 def add_category(request, parent_id=None):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -67,20 +76,25 @@ def add_category(request, parent_id=None):
             form.save()
             return redirect('home')
     else:
-        if parent_id:
-            parent = Category.objects.get(id=parent_id)
-            form = CategoryForm(initial={'parent': parent})
-        else:
-            form = CategoryForm()
+        form = CategoryForm(initial={'parent': parent_id})
     return render(request, 'cards/add_category.html', {'form': form})
 
 
-def category_detail(request, category_id):
+def edit_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
-    subcategories = category.subcategories.all()
-    cards = Card.objects.filter(category=category)
-    return render(request, 'cards/category_detail.html', {
-        'category': category,
-        'subcategories': subcategories,
-        'cards': cards,
-    })
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'cards/edit_category.html', {'form': form, 'category': category})
+
+
+def delete_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('home')
+    return render(request, 'cards/delete_category.html', {'category': category})

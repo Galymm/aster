@@ -1,0 +1,14 @@
+{% extends 'cards/base.html' %}
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4 text-center">Редактировать категорию "{{ category.name }}"</h2>
+    <form method="post" class="p-4 bg-white shadow rounded">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-4">Сохранить</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary px-4 ms-2">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

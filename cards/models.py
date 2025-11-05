@@ -6,6 +6,10 @@ class Category(models.Model):
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories'
     )
 
+    class Meta:
+        unique_together = ('parent', 'name')
+        ordering = ['parent__name', 'name']
+
     def __str__(self):
         if self.parent:
             return f"{self.parent.name} → {self.name}"
