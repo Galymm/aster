@@ -26,16 +26,24 @@ def home(request):
     if subcategory_name:
         cards = cards.filter(category__name=subcategory_name)
 
+    # Проверка прав редактирования
+    user_is_editor = request.user.groups.filter(name="Editor").exists() if request.user.is_authenticated else False
+    can_edit = request.user.is_authenticated and (user_is_editor or request.user.is_superuser)
+
     return render(request, 'cards/home.html', {
         'cards': cards.distinct(),
         'categories': categories,
         'selected_category': category_name,
         'selected_subcategory': subcategory_name,
+        'can_edit': can_edit
     })
 
 
 # ---- КАРТОЧКИ ----
 def add_card(request):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')  # запрет
+
     if Category.objects.count() == 0:
         return render(request, 'cards/no_category.html')
 
@@ -50,8 +58,13 @@ def add_card(request):
     return render(request, 'cards/add_card.html', {'form': form})
 
 
+
 def edit_card(request, card_id):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')
+
     card = get_object_or_404(Card, id=card_id)
+
     if request.method == 'POST':
         form = CardForm(request.POST, instance=card)
         if form.is_valid():
@@ -59,17 +72,26 @@ def edit_card(request, card_id):
             return redirect('home')
     else:
         form = CardForm(instance=card)
+
     return render(request, 'cards/edit_card.html', {'form': form})
 
 
+
 def delete_card(request, card_id):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')
+
     card = get_object_or_404(Card, id=card_id)
     card.delete()
     return redirect('home')
 
 
+
 # ---- КАТЕГОРИИ ----
 def add_category(request, parent_id=None):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')
+
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -80,8 +102,13 @@ def add_category(request, parent_id=None):
     return render(request, 'cards/add_category.html', {'form': form})
 
 
+
 def edit_category(request, category_id):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')
+
     category = get_object_or_404(Category, id=category_id)
+
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
@@ -89,12 +116,18 @@ def edit_category(request, category_id):
             return redirect('home')
     else:
         form = CategoryForm(instance=category)
+
     return render(request, 'cards/edit_category.html', {'form': form, 'category': category})
 
 
 def delete_category(request, category_id):
+    if not request.user.is_authenticated or not request.user.groups.filter(name="Editor").exists():
+        return redirect('home')
+
     category = get_object_or_404(Category, id=category_id)
+
     if request.method == 'POST':
         category.delete()
         return redirect('home')
+
     return render(request, 'cards/delete_category.html', {'category': category})
