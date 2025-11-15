@@ -11,6 +11,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['aster-3yfj.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

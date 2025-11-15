@@ -4,6 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
+
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
