@@ -2,7 +2,18 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
+def create_admin(request):
+    username = 'admin'
+    email = 'admin@example.com'
+    password = 'StrongPassword123'  # поставь свой пароль
+
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        return HttpResponse("Суперпользователь создан!")
+    else:
+        return HttpResponse("Пользователь уже существует.")
 
 def register(request):
     if request.method == "POST":
